@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ReelTracker</title>
+<style>
+:root {
+  --bg: #f4f5fa;
+  --card: #fff;
+  --fg: #111827;
+  --mut: #6b7280;
+  --bd: #e5e7eb;
+  --ac: #5b5bd6;
+  --ac2: #eef0ff;
+  --ok: #12805c;
+  --bad: #d12f2f;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1117;
+    --card: #181b24;
+    --fg: #eceef4;
+    --mut: #9aa1b2;
+    --bd: #2a2f3c;
+    --ac: #8b8bf5;
+    --ac2: #232547;
+    --ok: #4cd39b;
+    --bad: #ff7b7b;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1117;
+  --card: #181b24;
+  --fg: #eceef4;
+  --mut: #9aa1b2;
+  --bd: #2a2f3c;
+  --ac: #8b8bf5;
+  --ac2: #232547;
+  --ok: #4cd39b;
+  --bad: #ff7b7b;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: radial-gradient(900px 420px at 50% -80px, var(--ac2), transparent), var(--bg);
+  background-attachment: fixed;
+  color: var(--fg);
+  font: 15px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 14px 40px; }
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0 8px;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.3px;
+}
+
+.brand i {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--ac), #9b6cf7);
+  color: #fff;
+  border-radius: 8px;
+  padding: 2px 7px;
+  margin-right: 6px;
+}
+
+.pill {
+  font-size: 12px;
+  color: var(--mut);
+  border: 1px solid var(--bd);
+  border-radius: 99px;
+  padding: 3px 10px;
+  background: var(--card);
+}
+
+nav {
+  display: flex;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  padding: 4px;
+  margin: 6px 0 14px;
+  box-shadow: 0 6px 24px rgba(30, 30, 90, 0.07);
+}
+
+nav button {
+  flex: 1;
+  background: none;
+  border: 0;
+  color: var(--mut);
+  font: inherit;
+  font-weight: 600;
+  padding: 9px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+nav button.on {
+  background: var(--ac2);
+  color: var(--ac);
+}
+
+.card, .kpi {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 24px rgba(30, 30, 90, 0.07);
+}
+
+h2 { font-size: 15px; margin: 0 0 10px; }
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.kpi {
+  position: relative;
+  overflow: hidden;
+  padding-left: 16px;
+}
+
+.kpi:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(var(--ac), #9b6cf7);
+}
+
+.kpi span { font-size: 12px; color: var(--mut); }
+.kpi b { display: block; font-size: 22px; letter-spacing: -0.5px; }
+.kpi small { font-size: 12px; }
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+input, select, textarea {
+  font: inherit;
+  padding: 10px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--bd);
+  background: var(--bg);
+  color: var(--fg);
+  min-width: 0;
+  flex: 1 1 140px;
+}
+
+button.p {
+  background: var(--ac);
+  color: #fff;
+  border: 0;
+  border-radius: 9px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.g {
+  background: none;
+  border: 1px solid var(--bd);
+  color: var(--mut);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mut { color: var(--mut); font-size: 13px; }
+.up { color: var(--ok); }
+.dn { color: var(--bad); }
+
+.sc { overflow-x: auto; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--bd);
+  white-space: nowrap;
+}
+
+th {
+  color: var(--mut);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 130px;
+  padding-top: 6px;
+}
+
+.chart div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  font-size: 10px;
+  color: var(--mut);
+}
+
+.chart i {
+  display: block;
+  width: 100%;
+  background: var(--ac);
+  border-radius: 5px 5px 0 0;
+  min-height: 2px;
+}
+
+.vh {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.vh .rt { text-align: right; }
+.vh b { font-size: 16px; }
+
+.chip {
+  background: var(--ac2);
+  color: var(--ac);
+  border-radius: 99px;
+  padding: 2px 9px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+details { margin-top: 10px; }
+summary {
+  cursor: pointer;
+  color: var(--ac);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+textarea {
+  width: 100%;
+  height: 100px;
+  font: 12px monospace;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--bd);
+  border-radius: 9px;
+  padding: 8px;
+}
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--fg);
+  color: var(--bg);
+  padding: 9px 16px;
+  border-radius: 99px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 100;
+}
+
+#toast.show { opacity: 1; }
+
+.empty {
+  text-align: center;
+  padding: 26px 10px;
+  color: var(--mut);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #5b5bd6, #9b6cf7);
+  color: #fff;
+  border-radius: 18px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 10px 30px rgba(91, 91, 214, 0.35);
+}
+
+.pager .t {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+
+.pager .t b {
+  display: block;
+  font-size: 19px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pager .t span {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.pager button {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 0;
+  border-radius: 11px;
+  padding: 11px 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pager button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--bd);
+  cursor: pointer;
+}
+
+.dots i.on {
+  background: var(--ac);
+  width: 22px;
+}
+
+#lock {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#lock .box {
+  width: 100%;
+  max-width: 370px;
+  text-align: center;
+  padding: 26px;
+}
+
+.theme-btn {
+  background: none;
+  border: 1px solid var(--bd);
+  color: var(--mut);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== LOCK SCREEN ==================== -->
+<div id="lock">
+  <div class="box card">
+    <div class="brand" style="font-size:26px;margin-bottom:6px"><i>▶</i>ReelTracker</div>
+    <p class="mut">Private workspace. Enter your password to continue.</p>
+    <input id="pw" type="password" placeholder="Password" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')login()" style="width:100%;margin:8px 0">
+    <label class="mut" style="display:block;margin-bottom:10px">
+      <input id="rem" type="checkbox" style="flex:none;margin-right:6px"> Keep me signed in on this device
+    </label>
+    <button class="p" style="width:100%" onclick="login()">Unlock</button>
+    <p id="lerr" class="dn" style="min-height:20px;margin:8px 0 0"></p>
+    <p class="mut" style="margin-top:14px;font-size:12px">Default password: <b>reeltracker</b></p>
+  </div>
+</div>
+
+<!-- ==================== MAIN APP ==================== -->
+<div class="wrap">
+  <header>
+    <div class="brand"><i>▶</i>ReelTracker</div>
+    <div class="row" style="gap:6px;justify-content:flex-end">
+      <span class="pill" id="sync">⌂ This device only</span>
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌓</button>
+      <button class="g" onclick="lockNow()">🔒 Lock</button>
+    </div>
+  </header>
+
+  <nav>
+    <button data-t="dash" onclick="go('dash')">Overview</button>
+    <button data-t="ws" onclick="go('ws')">Accounts</button>
+    <button data-t="accs" onclick="go('accs')">Manage</button>
+  </nav>
+
+  <main id="main"></main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ==================== DATA ====================
+const KEY = "reeltracker_v3";
+let S = { accounts: [], videos: [] };
+let tab = "dash";
+let ci = 0;
+let tt = null;
+
+// Load saved data
+try {
+  const saved = localStorage.getItem(KEY);
+  if (saved) S = JSON.parse(saved);
+} catch (e) {}
+
+// ==================== HELPERS ====================
+function $(id) { return document.getElementById(id); }
+
+function uid() {
+  return Math.random().toString(36).slice(2, 9);
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function money(n) {
+  return "$" + Number(n || 0).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function num(n) {
+  return Math.round(n || 0).toLocaleString("en-US");
+}
+
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.className = "show";
+  clearTimeout(tt);
+  tt = setTimeout(() => el.className = "", 2600);
+}
+
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(S));
+  } catch (e) {
+    toast("Could not save data");
+  }
+}
+
+function go(t) {
+  tab = t;
+  render();
+}
+
+// ==================== CALCULATIONS ====================
+function calc() {
+  const A = {};
+  S.accounts.forEach(a => A[a.id] = a);
+
+  const days = {};
+  const vs = S.videos
+    .filter(v => A[v.acc])
+    .map(v => {
+      const sn = (v.snaps || []).slice().sort((a, b) => a.d < b.d ? -1 : 1);
+      let prev = 0;
+      const h = sn.map(s => {
+        const gain = s.v - prev;
+        prev = s.v;
+        return {
+          d: s.d,
+          t: s.v,
+          g: gain,
+          e: (gain / 1000) * v.cpm
+        };
+      });
+
+      h.forEach(x => {
+        const day = days[x.d] = days[x.d] || { g: 0, e: 0 };
+        day.g += x.g;
+        day.e += x.e;
+      });
+
+      const totalViews = sn.length ? sn[sn.length - 1].v : 0;
+      return {
+        v,
+        a: A[v.acc],
+        h,
+        t: totalViews,
+        e: (totalViews / 1000) * v.cpm
+      };
+    });
+
+  let totalViews = 0, totalEarn = 0;
+  vs.forEach(x => {
+    totalViews += x.t;
+    totalEarn += x.e;
+  });
+
+  return { A, vs, days, tv: totalViews, te: totalEarn };
+}
+
+function tbl(headers, rows) {
+  if (!rows.length) return `<div class="empty">No data yet.</div>`;
+  return `<div class="sc"><table>
+    <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
+    ${rows.join("")}
+  </table></div>`;
+}
+
+function delta(current, previous) {
+  if (previous === null || previous === undefined || !previous) return "";
+  const p = ((current - previous) / Math.abs(previous)) * 100;
+  return `<span class="${p >= 0 ? "up" : "dn"}">${p >= 0 ? "▲ " : "▼ "}${Math.abs(p).toFixed(0)}%</span>`;
+}
+
+// ==================== DASHBOARD ====================
+function dash(c) {
+  if (!S.accounts.length) {
+    return `<div class="card empty">
+      <h2>Welcome 👋</h2>
+      Add your first Instagram account to start tracking.<br><br>
+      <button class="p" onclick="go('accs')">Add account</button>
+    </div>`;
+  }
+
+  const dates = Object.keys(c.days).sort();
+  const last = dates[dates.length - 1];
+  const prev = dates[dates.length - 2];
+  const lastGain = last ? c.days[last].g : 0;
+  const prevGain = prev ? c.days[prev].g : null;
+
+  const sortedByGain = dates.slice().sort((a, b) => c.days[b].g - c.days[a].g);
+  const best = sortedByGain[0];
+  const worst = sortedByGain[sortedByGain.length - 1];
+
+  const last14 = dates.slice(-14);
+  const maxGain = Math.max(...last14.map(d => Math.max(c.days[d].g, 0)), 1);
+
+  const chart = last14.length
+    ? `<div class="chart">${last14.map(d => `
+        <div title="${d}: ${num(c.days[d].g)}">
+          <i style="height:${Math.max(2, Math.max(c.days[d].g, 0) / maxGain * 100)}%"></i>
+          ${d.slice(8)}
+        </div>`).join("")}</div>`
+    : `<div class="empty">Update some video views to see the chart.</div>`;
+
+  // Account & Category stats
+  const accStats = {}, catStats = {};
+  c.vs.forEach(x => {
+    const a = accStats[x.a.id] = accStats[x.a.id] || { name: x.a.name, cat: x.a.cat, count: 0, views: 0, earn: 0 };
+    a.count++; a.views += x.t; a.earn += x.e;
+
+    const cat = catStats[x.a.cat] = catStats[x.a.cat] || { count: 0, views: 0, earn: 0 };
+    cat.count++; cat.views += x.t; cat.earn += x.e;
+  });
+
+  function avgCpm(o) {
+    return o.views ? money(o.earn / o.views * 1000) : "-";
+  }
+
+  const accRows = Object.keys(accStats)
+    .sort((a, b) => accStats[b].earn - accStats[a].earn)
+    .map(id => {
+      const o = accStats[id];
+      return `<tr>
+        <td>${esc(o.name)}</td>
+        <td>${esc(o.cat)}</td>
+        <td>${o.count}</td>
+        <td>${num(o.views)}</td>
+        <td>${money(o.earn)}</td>
+        <td>${avgCpm(o)}</td>
+      </tr>`;
+    });
+
+  const catRows = Object.keys(catStats)
+    .sort((a, b) => catStats[b].earn - catStats[a].earn)
+    .map(cat => {
+      const o = catStats[cat];
+      return `<tr>
+        <td>${esc(cat)}</td>
+        <td>${o.count}</td>
+        <td>${num(o.views)}</td>
+        <td>${money(o.earn)}</td>
+        <td>${avgCpm(o)}</td>
+      </tr>`;
+    });
+
+  const dayRows = dates.slice().reverse().map(d => {
+    const idx = dates.indexOf(d);
+    const prevGain = idx > 0 ? c.days[dates[idx - 1]].g : null;
+    return `<tr>
+      <td>${d}</td>
+      <td>${num(c.days[d].g)}</td>
+      <td>${money(c.days[d].e)}</td>
+      <td>${delta(c.days[d].g, prevGain)}</td>
+    </tr>`;
+  });
+
+  // Export data
+  const lines = ["Date\tAccount\tCategory\tVideo\tCPM\tTotal views\tNew views\tEarnings"];
+  c.vs.forEach(x => {
+    x.h.forEach(h => {
+      lines.push([
+        h.d, x.a.name, x.a.cat, x.v.title, x.v.cpm,
+        h.t, h.g, h.e.toFixed(2)
+      ].join("\t"));
+    });
+  });
+
+  return `
+    <div class="kpis">
+      <div class="kpi"><span>Total views</span><b>${num(c.tv)}</b></div>
+      <div class="kpi"><span>Total earnings</span><b>${money(c.te)}</b></div>
+      <div class="kpi"><span>Latest day (${last || "-"})</span><b>+${num(lastGain)}</b><small>${delta(lastGain, prevGain)}</small></div>
+      <div class="kpi"><span>Average CPM</span><b>${c.tv ? money(c.te / c.tv * 1000) : "-"}</b></div>
+    </div>
+
+    <div class="card">
+      <h2>Daily new views (last 14 days)</h2>
+      ${chart}
+      ${best ? `<p class="mut">Best day: <b>${best}</b> (+${num(c.days[best].g)}) · Weakest day: <b>${worst}</b> (${num(c.days[worst].g)})</p>` : ""}
+    </div>
+
+    <div class="card">
+      <h2>Accounts</h2>
+      ${tbl(["Account", "Category", "Videos", "Views", "Earnings", "Avg CPM"], accRows)}
+    </div>
+
+    <div class="card">
+      <h2>Categories</h2>
+      ${tbl(["Category", "Videos", "Views", "Earnings", "Avg CPM"], catRows)}
+    </div>
+
+    <div class="card">
+      <h2>Day by day</h2>
+      ${tbl(["Date", "New views", "Earnings", "vs previous day"], dayRows)}
+    </div>
+
+    <div class="card">
+      <h2>Export to Google Sheets</h2>
+      <p class="mut">Press Copy, then paste into a sheet.</p>
+      <textarea id="tsv" readonly>${esc(lines.join("\n"))}</textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="p" onclick="copyTSV()">Copy</button>
+      </div>
+    </div>`;
+}
+
+// ==================== ACCOUNT VIEW ====================
+function makeChart(days) {
+  const dates = Object.keys(days).sort().slice(-14);
+  const max = Math.max(...dates.map(d => Math.max(days[d].g, 0)), 1);
+  return dates.length
+    ? `<div class="chart">${dates.map(d => `
+        <div title="${d}: ${num(days[d].g)}">
+          <i style="height:${Math.max(2, Math.max(days[d].g, 0) / max * 100)}%"></i>
+          ${d.slice(8)}
+        </div>`).join("")}</div>`
+    : `<div class="empty">Update video views to see the chart.</div>`;
+}
+
+function videoCard(x) {
+  const last = x.h[x.h.length - 1];
+  const id = x.v.id;
+
+  return `
+    <div class="card">
+      <div class="vh">
+        <div>
+          <b>${esc(x.v.title)}</b>
+          <div class="mut">${x.h.length} updates</div>
+        </div>
+        <div class="rt">
+          <b>${money(x.e)}</b>
+          <div class="mut">${num(x.t)} views</div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-bottom:8px">
+        <span class="mut">CPM $</span>
+        <input style="max-width:90px;flex:0 0 90px" type="number" min="0" step="0.01"
+               value="${x.v.cpm}" onchange="setCpm('${id}', this.value)">
+        ${last ? `<span class="chip">+${num(last.g)} on ${last.d}</span>` : ""}
+      </div>
+
+      <div class="row">
+        <input type="date" id="d${id}" value="${today()}">
+        <input type="number" min="0" inputmode="numeric" id="w${id}" placeholder="Total views now">
+        <button class="p" onclick="updateViews('${id}')">Update</button>
+      </div>
+
+      <details>
+        <summary>History (${x.h.length})</summary>
+        ${tbl(["Date", "Total views", "New views", "Earned"],
+          x.h.slice().reverse().map(h =>
+            `<tr><td>${h.d}</td><td>${num(h.t)}</td><td>${num(h.g)}</td><td>${money(h.e)}</td></tr>`
+          ))}
+      </details>
+
+      <div style="margin-top:10px">
+        <button class="g" onclick="deleteItem('v','${id}',this)">Delete video</button>
+      </div>
+    </div>`;
+}
+
+function changeAccount(n) {
+  ci = Math.max(0, Math.min(S.accounts.length - 1, ci + n));
+  render();
+  window.scrollTo(0, 0);
+}
+
+function selectAccount(i) {
+  ci = i;
+  render();
+}
+
+function workspace(c) {
+  if (!S.accounts.length) {
+    return `<div class="card empty">
+      No accounts yet.<br><br>
+      <button class="p" onclick="go('accs')">Add account</button>
+    </div>`;
+  }
+
+  ci = Math.max(0, Math.min(S.accounts.length - 1, ci));
+  const acc = S.accounts[ci];
+  const total = S.accounts.length;
+  const myVideos = c.vs.filter(x => x.v.acc === acc.id);
+
+  const days = {};
+  let totalViews = 0, totalEarn = 0;
+
+  myVideos.forEach(x => {
+    totalViews += x.t;
+    totalEarn += x.e;
+    x.h.forEach(h => {
+      const d = days[h.d] = days[h.d] || { g: 0, e: 0 };
+      d.g += h.g;
+      d.e += h.e;
+    });
+  });
+
+  const dates = Object.keys(days).sort();
+  const last = dates[dates.length - 1];
+  const prev = dates[dates.length - 2];
+  const lastGain = last ? days[last].g : 0;
+  const prevGain = prev ? days[prev].g : null;
+
+  const dayRows = dates.slice().reverse().map(d => {
+    const idx = dates.indexOf(d);
+    const prevG = idx > 0 ? days[dates[idx - 1]].g : null;
+    return `<tr>
+      <td>${d}</td>
+      <td>${num(days[d].g)}</td>
+      <td>${money(days[d].e)}</td>
+      <td>${delta(days[d].g, prevG)}</td>
+    </tr>`;
+  });
+
+  const pager = `
+    <div class="pager">
+      <button onclick="changeAccount(-1)" ${ci === 0 ? "disabled" : ""}>‹ Prev</button>
+      <div class="t">
+        <b>${esc(acc.name)}</b>
+        <span>${esc(acc.cat)} · account ${ci + 1} of ${total}</span>
+      </div>
+      <button onclick="changeAccount(1)" ${ci === total - 1 ? "disabled" : ""}>Next ›</button>
+    </div>
+    <div class="dots">
+      ${S.accounts.map((_, i) =>
+        `<i class="${i === ci ? "on" : ""}" onclick="selectAccount(${i})"></i>`
+      ).join("")}
+    </div>`;
+
+  const kpis = `
+    <div class="kpis">
+      <div class="kpi"><span>Total views</span><b>${num(totalViews)}</b></div>
+      <div class="kpi"><span>Earnings</span><b>${money(totalEarn)}</b></div>
+      <div class="kpi"><span>Latest day (${last || "-"})</span><b>+${num(lastGain)}</b><small>${delta(lastGain, prevGain)}</small></div>
+      <div class="kpi"><span>Avg CPM · ${myVideos.length} videos</span><b>${totalViews ? money(totalEarn / totalViews * 1000) : "-"}</b></div>
+    </div>`;
+
+  const addForm = `
+    <div class="card">
+      <h2>Add a video to ${esc(acc.name)}</h2>
+      <div class="row">
+        <input id="nvt" placeholder="Video title">
+        <input id="nvc" type="number" min="0" step="0.01" inputmode="decimal" placeholder="CPM $ per 1000 views">
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input id="nvv" type="number" min="0" inputmode="numeric" placeholder="Views so far (optional)">
+        <input id="nvd" type="date" value="${today()}">
+        <button class="p" onclick="addVideo()">Add video</button>
+      </div>
+    </div>`;
+
+  return pager + kpis +
+    `<div class="card"><h2>Daily new views</h2>${makeChart(days)}</div>` +
+    addForm +
+    `<h2 style="margin:16px 2px 8px">Videos</h2>` +
+    (myVideos.length
+      ? myVideos.slice().reverse().map(videoCard).join("")
+      : `<div class="card empty">No videos in this account yet.</div>`) +
+    `<div class="card"><h2>Day by day</h2>${tbl(["Date", "New views", "Earnings", "vs previous day"], dayRows)}</div>`;
+}
+
+// ==================== MANAGE ACCOUNTS ====================
+function manageAccounts() {
+  const categories = [];
+  S.accounts.forEach(a => {
+    if (!categories.includes(a.cat)) categories.push(a.cat);
+  });
+
+  const form = `
+    <div class="card">
+      <h2>Add an account</h2>
+      <div class="row">
+        <input id="na" placeholder="Account name">
+        <input id="nc" list="cl" placeholder="Category (Memes, Facts...)">
+        <datalist id="cl">${categories.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
+        <button class="p" onclick="addAccount()">Add</button>
+      </div>
+    </div>`;
+
+  const list = S.accounts.map(a => {
+    const count = S.videos.filter(v => v.acc === a.id).length;
+    return `
+      <div class="card">
+        <div class="vh">
+          <div>
+            <b>${esc(a.name)}</b>
+            <div class="mut">${esc(a.cat)} · ${count} videos</div>
+          </div>
+          <button class="g" onclick="deleteItem('a','${a.id}',this)">Delete</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  return form + (list || `<div class="card empty">No accounts yet.</div>`);
+}
+
+// ==================== RENDER ====================
+function render() {
+  document.querySelectorAll("nav button").forEach(btn => {
+    btn.className = btn.dataset.t === tab ? "on" : "";
+  });
+
+  const data = calc();
+  if (tab === "dash") {
+    $("main").innerHTML = dash(data);
+  } else if (tab === "ws") {
+    $("main").innerHTML = workspace(data);
+  } else {
+    $("main").innerHTML = manageAccounts();
+  }
+}
+
+// ==================== ACTIONS ====================
+function addAccount() {
+  const name = $("na").value.trim();
+  const cat = $("nc").value.trim() || "General";
+  if (!name) {
+    toast("Enter an account name");
+    return;
+  }
+  S.accounts.push({ id: uid(), name, cat });
+  ci = S.accounts.length - 1;
+  save();
+  render();
+  toast("Account added");
+}
+
+function addVideo() {
+  const accId = S.accounts[ci].id;
+  const title = $("nvt").value.trim();
+  const cpm = parseFloat($("nvc").value);
+  const views = parseFloat($("nvv").value);
+  const date = $("nvd").value || today();
+
+  if (!title || isNaN(cpm)) {
+    toast("Enter a title and CPM");
+    return;
+  }
+
+  S.videos.push({
+    id: uid(),
+    acc: accId,
+    title,
+    cpm,
+    snaps: [{ d: date, v: isNaN(views) ? 0 : views }]
+  });
+
+  save();
+  render();
+  toast("Video added");
+}
+
+function updateViews(id) {
+  const views = parseFloat($("w" + id).value);
+  const date = $("d" + id).value || today();
+
+  if (isNaN(views)) {
+    toast("Enter total views");
+    return;
+  }
+
+  const video = S.videos.find(v => v.id === id);
+  if (!video) return;
+
+  const previous = video.snaps
+    .filter(s => s.d < date)
+    .sort((a, b) => a.d < b.d ? 1 : -1)[0];
+
+  video.snaps = video.snaps.filter(s => s.d !== date);
+  video.snaps.push({ d: date, v: views });
+
+  save();
+  render();
+
+  if (previous && views < previous.v) {
+    toast("Saved, but views are lower than the last entry");
+  } else {
+    toast("Updated");
+  }
+}
+
+function setCpm(id, value) {
+  const cpm = parseFloat(value);
+  if (isNaN(cpm)) return;
+  S.videos.forEach(v => {
+    if (v.id === id) v.cpm = cpm;
+  });
+  save();
+  render();
+  toast("CPM changed");
+}
+
+function deleteItem(type, id, btn) {
+  if (btn.dataset.confirm !== "1") {
+    btn.dataset.confirm = "1";
+    btn.textContent = "Tap again to confirm";
+    return;
+  }
+
+  if (type === "a") {
+    S.accounts = S.accounts.filter(a => a.id !== id);
+    S.videos = S.videos.filter(v => v.acc !== id);
+  } else {
+    S.videos = S.videos.filter(v => v.id !== id);
+  }
+
+  save();
+  render();
+}
+
+function copyTSV() {
+  const textarea = $("tsv");
+  textarea.select();
+  try {
+    navigator.clipboard.writeText(textarea.value).then(() => toast("Copied"));
+  } catch (e) {
+    try {
+      document.execCommand("copy");
+      toast("Copied");
+    } catch (err) {
+      toast("Could not copy");
+    }
+  }
+}
+
+// ==================== THEME ====================
+function toggleTheme() {
+  const root = document.documentElement;
+  const current = root.getAttribute("data-theme");
+  if (current === "dark") {
+    root.setAttribute("data-theme", "light");
+  } else if (current === "light") {
+    root.removeAttribute("data-theme");
+  } else {
+    root.setAttribute("data-theme", "dark");
+  }
+}
+
+// ==================== PASSWORD LOCK ====================
+const PASSWORD_HASH = "6c769bbd1c1cda843725ebe3d69a6103f492587588d7fd9faea870ec7b8bc7fd"; // password = reeltracker
+
+async function hashPassword(text) {
+  const data = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("reeltracker:" + text));
+  return Array.from(new Uint8Array(data))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function isUnlocked() {
+  try {
+    return sessionStorage.getItem("rt_ok") === PASSWORD_HASH ||
+           localStorage.getItem("rt_ok") === PASSWORD_HASH;
+  } catch (e) {
+    return false;
+  }
+}
+
+function openApp() {
+  $("lock").style.display = "none";
+  render();
+}
+
+function lockNow() {
+  try {
+    sessionStorage.removeItem("rt_ok");
+    localStorage.removeItem("rt_ok");
+  } catch (e) {}
+  $("main").innerHTML = "";
+  $("lock").style.display = "flex";
+}
+
+async function login() {
+  let hash;
+  try {
+    hash = await hashPassword($("pw").value);
+  } catch (e) {
+    $("lerr").textContent = "Could not verify. Please open in Chrome over HTTPS.";
+    return;
+  }
+
+  if (hash === PASSWORD_HASH) {
+    try {
+      sessionStorage.setItem("rt_ok", PASSWORD_HASH);
+      if ($("rem").checked) {
+        localStorage.setItem("rt_ok", PASSWORD_HASH);
+      }
+    } catch (e) {}
+    $("pw").value = "";
+    $("lerr").textContent = "";
+    openApp();
+  } else {
+    $("lerr").textContent = "Wrong password. Please try again.";
+  }
+}
+
+// ==================== START ====================
+if (isUnlocked()) {
+  openApp();
+}
+</script>
+</body>
+</html>
